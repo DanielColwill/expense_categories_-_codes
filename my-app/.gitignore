@@ -1,0 +1,22 @@
+# Root
+node_modules/
+package-lock.json
+
+# Frontend
+frontend/node_modules/
+frontend/dist/
+frontend/package-lock.json
+
+# Backend
+backend/venv/
+backend/__pycache__/
+backend/**/__pycache__/
+backend/*.pyc
+backend/**/*.pyc
+backend/src/__pycache__/
+
+# Environment variables
+.env
+.env.local
+backend/.env
+frontend/.env
