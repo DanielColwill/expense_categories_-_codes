@@ -1,7 +1,12 @@
-from attrs import define
+from pydantic import BaseModel
 
-@define
-class ExpenseCategory:
-    id: int
+class ExpenseCategory(BaseModel):
     name: str
-    is_active: bool
+    is_active: bool = True
+
+
+class ExpenseCategoryCreate(ExpenseCategory):
+    pass
+
+class ExpenseCategoryResponse(ExpenseCategory):
+    id: int

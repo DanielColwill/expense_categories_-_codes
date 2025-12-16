@@ -1,6 +1,7 @@
 # Root
 node_modules/
 package-lock.json
+*.db
 
 # Frontend
 frontend/node_modules/
@@ -14,7 +15,7 @@ backend/**/__pycache__/
 backend/*.pyc
 backend/**/*.pyc
 backend/src/__pycache__/
-
+\
 # Backend - uv specific
 backend/.python-version
 backend/uv.lock
