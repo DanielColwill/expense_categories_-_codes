@@ -16,7 +16,7 @@ export const ExpenseCodes = ({ selectedCategory }) => {
         .then((res) => res.json())
         .then((data) => setCodes(data));
     }
-  }, [selectedCategory]); // Only re-runs when a DIFFERENT category is clicked
+  }, [selectedCategory]);
 
   const addCode = async (e) => {
     e.preventDefault();

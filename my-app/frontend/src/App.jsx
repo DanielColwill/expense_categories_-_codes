@@ -38,7 +38,6 @@ function App() {
 
   return (
     <>
-      {/* Form Card (Add New) */}
       <div className="card bg-base-100 shadow-xl mb-8">
         <div className="card-body">
           <h2 className="card-title text-2xl mb-6">Add a Category</h2>
