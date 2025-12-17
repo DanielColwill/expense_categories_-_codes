@@ -25,3 +25,4 @@ backend/uv.lock
 .env.local
 backend/.env
 frontend/.env
+pytest.ini
