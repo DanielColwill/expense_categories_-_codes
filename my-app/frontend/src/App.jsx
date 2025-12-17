@@ -6,6 +6,15 @@ function App() {
   const [formData, setFormData] = useState({ name: "", is_active: true });
   const [error, setError] = useState("");
   const [editingId, setEditingId] = useState(null);
+  const [selectedCategory, setSelectedCategory] = useState(null);
+  const [codes, setCodes] = useState([]);
+  const [codeForm, setCodeForm] = useState({
+    code: "",
+    description: "",
+    is_active: true,
+  });
+
+  const [editingCodeId, setEditingCodeId] = useState(null);
 
   useEffect(() => {
     fetch("/api/categories")
@@ -44,7 +53,6 @@ function App() {
     setError("");
 
     try {
-      // crete new category
       const response = await fetch("/api/categories", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -62,6 +70,59 @@ function App() {
       setFormData({ name: "", is_active: true });
     } catch (err) {
       setError(err.message);
+    }
+  };
+
+  const selectCategory = async (category) => {
+    setSelectedCategory(category);
+    setCodes([]);
+
+    try {
+      const res = await fetch(`/api/categories/${category.id}/codes`);
+      const data = await res.json();
+      setCodes(data);
+    } catch (err) {
+      setError("Failed to load expense codes");
+    }
+  };
+
+  const addCode = async (e) => {
+    e.preventDefault();
+
+    try {
+      const res = await fetch(`/api/categories/${selectedCategory.id}/codes`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(codeForm),
+      });
+
+      const newCode = await res.json();
+      setCodes([...codes, newCode]);
+
+      setCodeForm({ code: "", description: "", is_active: true });
+    } catch {
+      setError("Failed to add code");
+    }
+  };
+
+  const saveCode = async (code) => {
+    try {
+      const res = await fetch(`/api/codes/${code.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          description: code.description,
+          is_active: code.is_active,
+        }),
+      });
+
+      const updated = await res.json();
+
+      setCodes(codes.map((c) => (c.id === code.id ? updated : c)));
+
+      setEditingCodeId(null);
+    } catch {
+      setError("Failed to update code");
     }
   };
 
@@ -124,7 +185,16 @@ function App() {
                 </thead>
                 <tbody>
                   {categories.map((category) => (
-                    <tr key={category.id} className="hover">
+                    <tr
+                      key={category.id}
+                      className={`hover cursor-pointer ${
+                        selectedCategory?.id === category.id
+                          ? "bg-base-200"
+                          : ""
+                      }`}
+                      onClick={() => selectCategory(category)}
+                    >
+                      {" "}
                       <td className="font-mono text-center align-middle">
                         {category.id}
                       </td>
@@ -143,37 +213,55 @@ function App() {
                         )}
                       </td>
                       <td className="text-center align-middle">
-                        {category.is_active ? (
-                          <span className="badge badge-success badge-lg gap-2">
+                        {editingId === category.id ? (
+                          <label className="flex justify-center items-center gap-2">
+                            <input
+                              type="checkbox"
+                              className="toggle toggle-success"
+                              checked={formData.is_active}
+                              onChange={(e) =>
+                                setFormData({
+                                  ...formData,
+                                  is_active: e.target.checked,
+                                })
+                              }
+                            />
+                            <span className="text-sm font-medium">
+                              {formData.is_active ? "Active" : "Inactive"}
+                            </span>
+                          </label>
+                        ) : category.is_active ? (
+                          <span className="badge badge-success gap-2 py-3 px-4 text-white border-none">
                             <svg
                               xmlns="http://www.w3.org/2000/svg"
                               fill="none"
                               viewBox="0 0 24 24"
-                              className="inline-block w-4 h-4 stroke-current"
+                              strokeWidth="3"
+                              stroke="currentColor"
+                              className="w-4 h-4"
                             >
                               <path
                                 strokeLinecap="round"
                                 strokeLinejoin="round"
-                                strokeWidth="2"
-                                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                              ></path>
+                                d="M4.5 12.75l6 6 9-13.5"
+                              />
                             </svg>
                             Active
                           </span>
                         ) : (
-                          <span className="badge badge-error badge-lg gap-2">
+                          <span className="badge badge-error gap-2 inline-flex items-center">
                             <svg
                               xmlns="http://www.w3.org/2000/svg"
                               fill="none"
                               viewBox="0 0 24 24"
-                              className="inline-block w-4 h-4 stroke-current"
+                              className="inline-block w-3 h-3 stroke-current"
                             >
                               <path
                                 strokeLinecap="round"
                                 strokeLinejoin="round"
                                 strokeWidth="2"
                                 d="M6 18L18 6M6 6l12 12"
-                              ></path>
+                              />
                             </svg>
                             Inactive
                           </span>
@@ -208,6 +296,155 @@ function App() {
             </div>
           )}
         </div>
+        {selectedCategory && (
+          <div className="card bg-base-100 shadow-xl mt-8">
+            <div className="card-body">
+              <h2 className="card-title text-xl">
+                Expense Codes – {selectedCategory.name}
+              </h2>
+              {/* Add Code */}
+              <form onSubmit={addCode} className="flex gap-2 mb-4">
+                <input
+                  className="input input-bordered"
+                  placeholder="Code"
+                  value={codeForm.code}
+                  onChange={(e) =>
+                    setCodeForm({ ...codeForm, code: e.target.value })
+                  }
+                  required
+                />
+                <input
+                  className="input input-bordered flex-1"
+                  placeholder="Description"
+                  value={codeForm.description}
+                  onChange={(e) =>
+                    setCodeForm({
+                      ...codeForm,
+                      description: e.target.value,
+                    })
+                  }
+                />
+                <button className="btn btn-primary">Add</button>
+              </form>
+              {/* Codes Table */}
+              <div className="overflow-x-auto">
+                <table className="table w-full">
+                  <thead>
+                    <tr>
+                      <th>Code</th>
+                      <th>Description</th>
+                      <th>Status</th>
+                      <th></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {codes.map((code) => (
+                      <tr key={code.id}>
+                        <td className="font-mono">{code.code}</td>
+
+                        <td>
+                          {editingCodeId === code.id ? (
+                            <input
+                              className="input input-sm input-bordered w-full"
+                              value={code.description || ""}
+                              onChange={(e) =>
+                                setCodes(
+                                  codes.map((c) =>
+                                    c.id === code.id
+                                      ? { ...c, description: e.target.value }
+                                      : c
+                                  )
+                                )
+                              }
+                            />
+                          ) : (
+                            code.description || "—"
+                          )}
+                        </td>
+                        <td>
+                          {editingCodeId === code.id ? (
+                            <label className="flex items-center gap-2">
+                              <input
+                                type="checkbox"
+                                className="toggle toggle-success"
+                                checked={code.is_active}
+                                onChange={(e) =>
+                                  setCodes(
+                                    codes.map((c) =>
+                                      c.id === code.id
+                                        ? { ...c, is_active: e.target.checked }
+                                        : c
+                                    )
+                                  )
+                                }
+                              />
+                              <span className="text-sm font-medium">
+                                {code.is_active ? "Active" : "Inactive"}
+                              </span>
+                            </label>
+                          ) : code.is_active ? (
+                            <span className="badge badge-success gap-2 py-3 px-4 text-white border-none">
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                strokeWidth="3"
+                                stroke="currentColor"
+                                className="w-4 h-4"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  d="M4.5 12.75l6 6 9-13.5"
+                                />
+                              </svg>
+                              Active
+                            </span>
+                          ) : (
+                            <span className="badge badge-error gap-2 inline-flex items-center">
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                className="inline-block w-3 h-3 stroke-current"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth="2"
+                                  d="M6 18L18 6M6 6l12 12"
+                                />
+                              </svg>
+                              Inactive
+                            </span>
+                          )}
+                        </td>
+
+                        <td>
+                          {editingCodeId === code.id ? (
+                            <button
+                              className="btn btn-sm btn-success"
+                              onClick={() => saveCode(code)}
+                            >
+                              Save
+                            </button>
+                          ) : (
+                            <button
+                              className="btn btn-sm btn-outline"
+                              onClick={() => setEditingCodeId(code.id)}
+                            >
+                              Edit
+                            </button>
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </>
   );

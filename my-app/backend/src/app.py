@@ -55,3 +55,72 @@ def update_category(
     db.refresh(db_category)
     
     return db_category
+
+
+@app.get(
+    "/api/categories/{id}/codes",
+    response_model=list[dataclasses.ExpenseCodeResponse]
+)
+def get_codes_for_category(id: int, db: Session = Depends(get_db)):
+    category = db.query(models.ExpenseCategory).filter(
+        models.ExpenseCategory.id == id
+    ).first()
+
+    if not category:
+        raise HTTPException(status_code=404, detail="Category not found")
+
+    return category.codes
+
+
+@app.post(
+    "/api/categories/{id}/codes",
+    response_model=dataclasses.ExpenseCodeResponse
+)
+def create_code_for_category(
+    id: int,
+    code: dataclasses.ExpenseCodeCreate,
+    db: Session = Depends(get_db),
+):
+    category = db.query(models.ExpenseCategory).filter(
+        models.ExpenseCategory.id == id
+    ).first()
+
+    if not category:
+        raise HTTPException(status_code=404, detail="Category not found")
+
+    db_code = models.ExpenseCode(
+        category_id=id,
+        code=code.code,
+        description=code.description,
+        is_active=code.is_active,
+    )
+
+    db.add(db_code)
+    db.commit()
+    db.refresh(db_code)
+
+    return db_code
+
+@app.put(
+    "/api/codes/{id}",
+    response_model=dataclasses.ExpenseCodeResponse
+)
+def update_code(
+    id: int,
+    code: dataclasses.ExpenseCodeUpdate,
+    db: Session = Depends(get_db),
+):
+    db_code = db.query(models.ExpenseCode).filter(
+        models.ExpenseCode.id == id
+    ).first()
+
+    if not db_code:
+        raise HTTPException(status_code=404, detail="Code not found")
+
+    db_code.description = code.description
+    db_code.is_active = code.is_active
+
+    db.commit()
+    db.refresh(db_code)
+
+    return db_code
