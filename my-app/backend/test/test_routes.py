@@ -58,3 +58,19 @@ def test_get_categories_with_dummy_data():
     ]
 
     
+def test_put_categories_with_dummy_data():
+    db_session = Session(bind=engine)
+    category_one = ExpenseCategory(name="One", is_active=True)
+
+    db_session.add_all([category_one])
+    db_session.commit()
+    db_session.refresh(category_one)
+
+    id_one = category_one.id
+    response = client.put(
+        f"/api/categories/{id_one}",
+        json={"name": "Updated One", "is_active": False}
+    )
+    assert response.status_code == 200
+    assert response.json()["id"] == id_one
+    assert response.json()["name"] == "Updated One"

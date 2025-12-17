@@ -34,3 +34,24 @@ def create_category(category: dataclasses.ExpenseCategory, db: Session = Depends
 @app.get("/api/categories", response_model=list[dataclasses.ExpenseCategoryResponse])
 def get_categories(db: Session = Depends(get_db)):
     return db.query(models.ExpenseCategory).all()
+
+@app.put("/api/categories/{id}", response_model=dataclasses.ExpenseCategoryResponse)
+def update_category(
+    id: int, 
+    category: dataclasses.ExpenseCategory, 
+    db: Session = Depends(get_db)
+):
+    db_category = db.query(models.ExpenseCategory).filter(
+        models.ExpenseCategory.id == id
+    ).first()
+    
+    if not db_category:
+        raise HTTPException(status_code=404, detail="Category not found")
+    
+    db_category.name = category.name
+    db_category.is_active = category.is_active
+    
+    db.commit()
+    db.refresh(db_category)
+    
+    return db_category
