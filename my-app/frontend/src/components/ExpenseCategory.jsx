@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useCategoryForm } from "../hooks/useCategoryForm";
 
 export const ExpenseCategory = ({
   category,
@@ -6,18 +6,14 @@ export const ExpenseCategory = ({
   onSelect,
   onUpdate,
 }) => {
-  const [isEditing, setIsEditing] = useState(false);
-  const [rowForm, setRowForm] = useState({
-    name: category.name,
-    is_active: category.is_active,
-  });
+  const { isEditing, rowForm, toggleEdit, updateField } = useCategoryForm(
+    category,
+    onUpdate
+  );
 
   const handleAction = (e) => {
     e.stopPropagation();
-    if (isEditing) {
-      onUpdate(category.id, rowForm);
-    }
-    setIsEditing(!isEditing);
+    toggleEdit();
   };
 
   return (
@@ -36,7 +32,7 @@ export const ExpenseCategory = ({
             className="input input-bordered input-sm w-full"
             value={rowForm.name}
             onClick={(e) => e.stopPropagation()}
-            onChange={(e) => setRowForm({ ...rowForm, name: e.target.value })}
+            onChange={(e) => updateField("name", e.target.value)}
           />
         ) : (
           <span className="font-bold text-gray-800">{category.name}</span>
@@ -53,9 +49,8 @@ export const ExpenseCategory = ({
                 type="checkbox"
                 className="toggle toggle-success"
                 checked={rowForm.is_active}
-                onChange={(e) =>
-                  setRowForm({ ...rowForm, is_active: e.target.checked })
-                }
+                // Use the hook's updateField method
+                onChange={(e) => updateField("is_active", e.target.checked)}
               />
               <span className="text-sm">
                 {rowForm.is_active ? "Active" : "Inactive"}
