@@ -1,4 +1,4 @@
-import { useCategoryForm } from "../hooks/useCategoryForm";
+import { useCategory } from "../hooks/useCategory";
 
 export const ExpenseCategory = ({
   category,
@@ -6,7 +6,7 @@ export const ExpenseCategory = ({
   onSelect,
   onUpdate,
 }) => {
-  const { isEditing, rowForm, toggleEdit, updateField } = useCategoryForm(
+  const { isEditing, rowForm, toggleEdit, updateField } = useCategory(
     category,
     onUpdate
   );
@@ -49,7 +49,6 @@ export const ExpenseCategory = ({
                 type="checkbox"
                 className="toggle toggle-success"
                 checked={rowForm.is_active}
-                // Use the hook's updateField method
                 onChange={(e) => updateField("is_active", e.target.checked)}
               />
               <span className="text-sm">

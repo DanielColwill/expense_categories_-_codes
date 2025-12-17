@@ -3,7 +3,7 @@ import { describe, test, expect, vi } from "vitest";
 import { useCategory } from "./useCategory";
 
 describe("useCategory Hook", () => {
-  const mockCategory = { id: 1, name: "Travel", is_active: true };
+  const mockCategory = { id: 1, name: "CategoryName", is_active: true };
 
   test("should update form data and trigger onUpdate on save", () => {
     const onUpdate = vi.fn();
@@ -11,7 +11,7 @@ describe("useCategory Hook", () => {
     const { result } = renderHook(() => useCategory(mockCategory, onUpdate));
 
     expect(result.current.isEditing).toBe(false);
-    expect(result.current.rowForm.name).toBe("Travel");
+    expect(result.current.rowForm.name).toBe("CategoryName");
 
     act(() => {
       result.current.toggleEdit();
@@ -20,18 +20,16 @@ describe("useCategory Hook", () => {
 
     // Update the field
     act(() => {
-      result.current.updateField("name", "Flights");
+      result.current.updateField("name", "CategoryNameUpdate");
     });
-    expect(result.current.rowForm.name).toBe("Flights");
+    expect(result.current.rowForm.name).toBe("CategoryNameUpdate");
 
-    // Save (this calls onUpdate)
     act(() => {
       result.current.toggleEdit();
     });
 
-    // Assertions
     expect(onUpdate).toHaveBeenCalledWith(1, {
-      name: "Flights",
+      name: "CategoryNameUpdate",
       is_active: true,
     });
     expect(result.current.isEditing).toBe(false);
