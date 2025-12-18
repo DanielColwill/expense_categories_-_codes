@@ -1,3 +1,9 @@
+
+
+
+https://github.com/user-attachments/assets/fa06f81e-15af-4862-a569-7e1ff5a63fed
+
+
 ## Things I did
 
 - chose to use vite, daisyUI, pydantic and fastAPI.
