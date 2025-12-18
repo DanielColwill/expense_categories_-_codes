@@ -2,7 +2,10 @@
 `npm run dev` in `/my-app`, with concurrently it will start up frontend at `localhost:5173` and backend at `localhost:8000`
 
 
-https://github.com/user-attachments/assets/fa06f81e-15af-4862-a569-7e1ff5a63fed
+
+
+https://github.com/user-attachments/assets/a57b7623-519b-4d6c-b9f7-d11207e81749
+
 
 
 ## Things I did
