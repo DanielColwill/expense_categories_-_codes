@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 
-export const ExpenseCodes = ({ selectedCategory }) => {
-  const [error, setError] = useState("");
+export const ExpenseCodes = ({ selectedCategory, onError }) => {
   const [codes, setCodes] = useState([]);
   const [editingCodeId, setEditingCodeId] = useState(null);
   const [codeForm, setCodeForm] = useState({
@@ -47,17 +46,12 @@ export const ExpenseCodes = ({ selectedCategory }) => {
 
       setEditingCodeId(null);
     } catch {
-      setError("Failed to update code");
+      onError("Failed to update code");
     }
   };
 
   return (
     <div className="card bg-base-100 shadow-xl mt-8">
-      {error && (
-        <div className="alert alert-error">
-          <span>{error}</span>
-        </div>
-      )}
       <div className="card-body">
         <h2 className="card-title text-xl">
           Expense Codes – {selectedCategory.name}

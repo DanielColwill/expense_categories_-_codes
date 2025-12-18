@@ -4,6 +4,7 @@ import { ExpenseCategory } from "./components/ExpenseCategory";
 import { ExpenseCodes } from "./components/ExpenseCodes";
 
 function App() {
+  const [error, setError] = useState("");
   const [categories, setCategories] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [formData, setFormData] = useState({ name: "", is_active: true });
@@ -13,31 +14,47 @@ function App() {
       .then((data) => setCategories(data));
   }, []);
 
+  const handleError = (errorMessage) => {
+    setError(errorMessage);
+  };
   const handleAddCategory = async (e) => {
     e.preventDefault();
-    const response = await fetch("/api/categories", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(formData),
-    });
-    const newCat = await response.json();
-    setCategories([...categories, newCat]);
-    setFormData({ name: "", is_active: true });
+    try {
+      const response = await fetch("/api/categories", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
+      const newCat = await response.json();
+      setCategories([...categories, newCat]);
+      setFormData({ name: "", is_active: true });
+    } catch (err) {
+      handleError(err);
+    }
   };
 
   const handleUpdateCategory = async (id, updatedData) => {
-    const response = await fetch(`/api/categories/${id}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(updatedData),
-    });
-    const result = await response.json();
-    setCategories(categories.map((c) => (c.id === id ? result : c)));
-    if (selectedCategory?.id === id) setSelectedCategory(result);
+    try {
+      const response = await fetch(`/api/categories/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(updatedData),
+      });
+      const result = await response.json();
+      setCategories(categories.map((c) => (c.id === id ? result : c)));
+      if (selectedCategory?.id === id) setSelectedCategory(result);
+    } catch (err) {
+      handleError(err);
+    }
   };
 
   return (
     <>
+      {error && (
+        <div className="alert alert-error">
+          <span>{error}</span>
+        </div>
+      )}
       <div className="card bg-base-100 shadow-xl mb-8">
         <div className="card-body">
           <h2 className="card-title text-2xl mb-6">Add a Category</h2>
@@ -87,7 +104,12 @@ function App() {
         </div>
       </div>
 
-      {selectedCategory && <ExpenseCodes selectedCategory={selectedCategory} />}
+      {selectedCategory && (
+        <ExpenseCodes
+          selectedCategory={selectedCategory}
+          onError={handleError}
+        />
+      )}
     </>
   );
 }
